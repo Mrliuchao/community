@@ -48,7 +48,7 @@ public class AuthorizeController {
         //错误3  如果名字正确  错误原因 就是gitHub没有设置好公开信息  结果 在setting 设置
         GithubUser githubuser = githubProvider.getUser(accessToken);
         System.out.println(githubuser.toString());
-       if (githubuser !=null){
+       if (githubuser !=null && githubuser.getId()!=null){
            User user = new User();
            user.setName(githubuser.getName());
            user.setAccountId(String.valueOf(githubuser.getId()));
