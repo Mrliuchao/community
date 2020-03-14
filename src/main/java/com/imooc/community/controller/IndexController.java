@@ -22,17 +22,19 @@ public class IndexController {
         Cookie[] cookies = request.getCookies();
         //遍历cookie 判断 cookie的名字和 token 是否一致
         //取数据中查询  把 数据存到 session
+        if (cookies!=null){
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("token")){
+            if (cookie.getName().equals("token")) {
                 String token = cookie.getValue();
                 System.out.println(token);
                 User user = userMapper.findByToken(token);
 
-                if (user !=null){
-                    request.getSession().setAttribute("user",user);
+                if (user != null) {
+                    request.getSession().setAttribute("user", user);
                 }
                 break;
             }
+        }
         }
 
 
