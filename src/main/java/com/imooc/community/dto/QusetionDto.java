@@ -1,9 +1,10 @@
-package com.imooc.community.model;
+package com.imooc.community.dto;
 
+import com.imooc.community.model.User;
 import lombok.Data;
 
 @Data
-public class Quseetion {
+public class QusetionDto {
     private  Integer id;
     private String title;
     private String description;
@@ -14,6 +15,5 @@ public class Quseetion {
     private Integer commentCount;
     private Integer viewounCt;
     private Integer likeCount;
-
-
+    private User user;
 }
