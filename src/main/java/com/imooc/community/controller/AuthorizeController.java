@@ -5,6 +5,7 @@ import com.imooc.community.dto.GithubUser;
 import com.imooc.community.mapper.UserMapper;
 import com.imooc.community.model.User;
 import com.imooc.community.provider.GithubProvider;
+import com.imooc.community.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -28,9 +29,9 @@ public class AuthorizeController {
     private String clientSecret;
     @Value("${github.redirect.uri}")
     private String redirectUri;
-    @Autowired
-    private UserMapper userMapper;
 
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
@@ -52,12 +53,13 @@ public class AuthorizeController {
            User user = new User();
            user.setName(githubuser.getName());
            user.setAccountId(String.valueOf(githubuser.getId()));
+           user.setAvatarUrl(githubuser.getAvatarUrl());
            String token =  UUID.randomUUID().toString();
            user.setToken(token);
-           user.setGmtCreate(System.currentTimeMillis());
-           user.setGmtModified(System.currentTimeMillis());
+
            user.setAvatarUrl(githubuser.getAvatarUrl());
-           userMapper.insert(user);
+           userService.createOrUpdate(user);
+
            //登录成功 写cookie 和Session
            response.addCookie(new Cookie("token",token));
            return "redirect:/";
@@ -68,6 +70,16 @@ public class AuthorizeController {
 
     }
 
+
+    //退出
+    @GetMapping("/logout")
+    public String  logout(HttpServletRequest request,HttpServletResponse response){
+        request.getSession().removeAttribute("user");
+        Cookie cookie = new Cookie("token", null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return "redirect:/";
+    }
 
 
 }
