@@ -2,10 +2,7 @@ package com.imooc.community.mapper;
 
 import com.imooc.community.dto.QusetionDto;
 import com.imooc.community.model.Quseetion;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,4 +27,7 @@ public interface QuesstionMapper {
 
     @Select("select * from question where id = #{id}")
     Quseetion getById(@Param("id") Integer id);
+
+    @Update("update question set title= #{title} ,description = #{description}, tag = #{tag} ,gmt_modified = #{gmtModified} where  id =#{id}")
+    void update(Quseetion quseetion);
 }

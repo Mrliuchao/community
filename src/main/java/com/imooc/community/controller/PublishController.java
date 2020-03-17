@@ -1,12 +1,15 @@
 package com.imooc.community.controller;
 
+import com.imooc.community.dto.QusetionDto;
 import com.imooc.community.mapper.QuesstionMapper;
 import com.imooc.community.model.Quseetion;
 import com.imooc.community.model.User;
+import com.imooc.community.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -15,20 +18,33 @@ import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class PublishController {
+
     @Autowired
-    private QuesstionMapper quesstionMapper;
+    private QuestionService questionService;
 
     @GetMapping("/publish")
     public String publish(){
         return "publish";
     }
 
+    @GetMapping("/publish/{id}")
+    public String edit(@PathVariable(name =  "id") Integer id,
+                       Model model){
+        //通过id 获取  获取  question 对象
+        QusetionDto question = questionService.getById(id);
+        model.addAttribute("title",question.getTitle());
+        model.addAttribute("description",question.getDescription());
+        model.addAttribute("tag",question.getTag());
+        model.addAttribute("id",question.getId());
+        return  "publish";
+    }
 
     @PostMapping("/publish")
     public String doPublish(
-                    @RequestParam("title") String title,
-                    @RequestParam("description") String description,
-                    @RequestParam("tag") String tag,
+                    @RequestParam(value = "title" ,required = false) String title,
+                    @RequestParam(value = "description",required = false) String description,
+                    @RequestParam(value = "tag"  ,required = false) String tag,
+                    @RequestParam(value = "id"  ,required = false) Integer id,
                     HttpServletRequest request,
                     Model model
                     ){
@@ -60,10 +76,16 @@ public class PublishController {
         quseetion.setDescription(description);
         quseetion.setTag(tag);
         quseetion.setCreator(user.getId());
-        quseetion.setGmtCreate(System.currentTimeMillis());
-        quseetion.setGmtModified(System.currentTimeMillis());
-        quesstionMapper.cretae(quseetion);
+
+        quseetion.setId(id);
+        questionService.cretaeOrUpatde(quseetion);
+//        quesstionMapper.cretae(quseetion);
         return "redirect:/";
     }
 
+
+
 }
+
+
+

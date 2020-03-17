@@ -122,4 +122,17 @@ public class QuestionService {
         qusetionDto.setUser(user);
         return  qusetionDto;
     }
+
+    public void cretaeOrUpatde(Quseetion quseetion) {
+        if (quseetion.getId() == null){
+        //创建
+            quseetion.setGmtCreate(System.currentTimeMillis());
+            quseetion.setGmtModified(System.currentTimeMillis());
+            quesstionMapper.cretae(quseetion);
+        }else{
+            //修改
+            quseetion.setGmtCreate(System.currentTimeMillis());
+            quesstionMapper.update(quseetion);
+        }
+    }
 }
