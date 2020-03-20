@@ -1,7 +1,6 @@
 package com.imooc.community.controller;
 
 import com.imooc.community.dto.QusetionDto;
-import com.imooc.community.mapper.QuesstionMapper;
 import com.imooc.community.model.Quseetion;
 import com.imooc.community.model.User;
 import com.imooc.community.service.QuestionService;
@@ -28,7 +27,7 @@ public class PublishController {
     }
 
     @GetMapping("/publish/{id}")
-    public String edit(@PathVariable(name =  "id") Integer id,
+    public String edit(@PathVariable(name =  "id") Long id,
                        Model model){
         //通过id 获取  获取  question 对象
         QusetionDto question = questionService.getById(id);
@@ -44,7 +43,7 @@ public class PublishController {
                     @RequestParam(value = "title" ,required = false) String title,
                     @RequestParam(value = "description",required = false) String description,
                     @RequestParam(value = "tag"  ,required = false) String tag,
-                    @RequestParam(value = "id"  ,required = false) Integer id,
+                    @RequestParam(value = "id"  ,required = false) Long id,
                     HttpServletRequest request,
                     Model model
                     ){
@@ -76,10 +75,9 @@ public class PublishController {
         quseetion.setDescription(description);
         quseetion.setTag(tag);
         quseetion.setCreator(user.getId());
-
         quseetion.setId(id);
         questionService.cretaeOrUpatde(quseetion);
-//        quesstionMapper.cretae(quseetion);
+
         return "redirect:/";
     }
 

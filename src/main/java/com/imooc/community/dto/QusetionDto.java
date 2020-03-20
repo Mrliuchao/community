@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class QusetionDto {
-    private  Integer id;
+    private  Long id;
     private String title;
     private String description;
     private  String tag;
@@ -13,7 +13,7 @@ public class QusetionDto {
     private Long gmtModified;
     private  Integer creator;
     private Integer commentCount;
-    private Integer viewounCt;
+    private Integer viewCount;
     private Integer likeCount;
     private User user;
 }

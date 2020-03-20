@@ -10,6 +10,13 @@
     <script src="js/bootstrap.js" type="text/javascript"></script>
 
 </head>
+    <script type="application/javascript">
+       var closable =  window.localStorage.getItem("closable");
+       if (closable == "true"){
+           window.close();
+           window.localStorage.removeItem("closable");
+       }
+    </script>
     <body>
     <div th:insert="~{navigation :: nav}"></div>
     <div class="container-fluid main">
@@ -29,7 +36,7 @@
                             </h4>
                              <span th:text="${q.description}"></span></br>
                             <span class="text-desc" th:text="${q.commentCount}"></span> 个回复 ▪
-                            <span th:text="${q.viewounCt}"> </span>次浏览  ▪
+                            <span th:text="${q.viewCount}"> </span>次浏览  ▪
                             <span th:text="${#dates.format(q.gmtCreate,'yyyy-MM-dd HH:mm')}"></span>
                     </div>
                 </div>

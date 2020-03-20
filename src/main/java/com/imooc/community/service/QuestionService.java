@@ -2,10 +2,15 @@ package com.imooc.community.service;
 
 import com.imooc.community.dto.PaginationDTO;
 import com.imooc.community.dto.QusetionDto;
-import com.imooc.community.mapper.QuesstionMapper;
+import com.imooc.community.exception.CustomizeErrorCode;
+import com.imooc.community.exception.CustomizeException;
+import com.imooc.community.mapper.QuseetionExtMapper;
+import com.imooc.community.mapper.QuseetionMapper;
 import com.imooc.community.mapper.UserMapper;
 import com.imooc.community.model.Quseetion;
+import com.imooc.community.model.QuseetionExample;
 import com.imooc.community.model.User;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,11 +23,14 @@ public class QuestionService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    private QuesstionMapper quesstionMapper;
+    private QuseetionMapper quseetionMapper;
+    @Autowired
+    private QuseetionExtMapper quseetionExtMapper;
     public PaginationDTO getList(Integer page, Integer pagesize) {
 
         PaginationDTO paginationDTO = new PaginationDTO();
-      Integer pageSum = quesstionMapper.count();
+
+        Integer pageSum =(int) quseetionMapper.countByExample(new QuseetionExample());
         Integer totalPage ;
 
 
@@ -44,17 +52,12 @@ public class QuestionService {
         if (offset <0){
             offset = 0;
         }
-        List<Quseetion> list = quesstionMapper.getList(offset ,pagesize);
+        List<Quseetion> list = quseetionMapper.selectByExampleWithBLOBsWithRowbounds(new QuseetionExample(),new RowBounds(offset,pagesize));
         List<QusetionDto> qusetionDtoList = new ArrayList<>();
         for (Quseetion quseetion : list) {
-            User user =   userMapper.finById(quseetion.getCreator());
+            User user =   userMapper.selectByPrimaryKey(quseetion.getCreator());
             QusetionDto qusetionDto = new QusetionDto();
-            if (quseetion.getCommentCount() ==null){
-                quseetion.setCommentCount(0);
-            }
-            if (quseetion.getViewounCt() ==null){
-                quseetion.setViewounCt(0);
-            }
+
             BeanUtils.copyProperties(quseetion,qusetionDto);
             qusetionDto.setUser(user);
             qusetionDtoList.add(qusetionDto);
@@ -67,10 +70,11 @@ public class QuestionService {
         return paginationDTO;
     }
 
-    public PaginationDTO getList(Integer userId, Integer page, Integer pagesize) {
+    public PaginationDTO getList(Long userId, Integer page, Integer pagesize) {
         PaginationDTO paginationDTO = new PaginationDTO();
         Integer totalPage ;
-        Integer pageSum = quesstionMapper.countByUserId(userId);
+
+        Integer pageSum =(int) quseetionMapper.countByExample(new QuseetionExample());
         if (pageSum %pagesize == 0){
             totalPage =   pageSum/pagesize;
         }else {
@@ -88,17 +92,14 @@ public class QuestionService {
         if (offset <0){
             offset = 0;
         }
-        List<Quseetion> list = quesstionMapper.getListByUserId(userId,offset ,pagesize);
+        QuseetionExample quseetionExample = new QuseetionExample();
+        quseetionExample.createCriteria().andCreatorEqualTo(userId);
+        List<Quseetion> list = quseetionMapper.selectByExampleWithBLOBsWithRowbounds(new QuseetionExample(),new RowBounds(offset,pagesize));
         List<QusetionDto> qusetionDtoList = new ArrayList<>();
         for (Quseetion quseetion : list) {
-            User user =   userMapper.finById(quseetion.getCreator());
+            User user =   userMapper.selectByPrimaryKey(quseetion.getCreator());
             QusetionDto qusetionDto = new QusetionDto();
-            if (quseetion.getCommentCount() ==null){
-                quseetion.setCommentCount(0);
-            }
-            if (quseetion.getViewounCt() ==null){
-                quseetion.setViewounCt(0);
-            }
+
             BeanUtils.copyProperties(quseetion,qusetionDto);
             qusetionDto.setUser(user);
             qusetionDtoList.add(qusetionDto);
@@ -111,14 +112,17 @@ public class QuestionService {
         return paginationDTO;
     }
 
-    public QusetionDto getById(Integer id) {
-       Quseetion quseetion =  quesstionMapper.getById(id);
+    public QusetionDto getById(Long id) {
+        Quseetion quseetion =  quseetionMapper.selectByPrimaryKey(id);
+        if (quseetion == null){
+            throw  new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FQUND);
+        }
         QusetionDto qusetionDto = new QusetionDto();
-        if (quseetion.getViewounCt() ==null){
-            quseetion.setViewounCt(0);
+        if (quseetion.getViewCount() ==null){
+            quseetion.setViewCount(0);
         }
         BeanUtils.copyProperties(quseetion,qusetionDto);
-        User user = userMapper.finById(quseetion.getCreator());
+        User user = userMapper.selectByPrimaryKey(quseetion.getCreator());
         qusetionDto.setUser(user);
         return  qusetionDto;
     }
@@ -128,11 +132,45 @@ public class QuestionService {
         //创建
             quseetion.setGmtCreate(System.currentTimeMillis());
             quseetion.setGmtModified(System.currentTimeMillis());
-            quesstionMapper.cretae(quseetion);
+            if (quseetion.getCommentCount() ==null){
+                quseetion.setCommentCount(0);
+            }
+            if (quseetion.getViewCount() ==null){
+                quseetion.setViewCount(0);
+            }
+            if (quseetion.getCommentCount() == null){
+                quseetion.setCommentCount(0);
+            }
+            if (quseetion.getLikeCount()==null){
+                quseetion.setLikeCount(0);
+            }
+
+           quseetionMapper.insertSelective(quseetion);
         }else{
             //修改
-            quseetion.setGmtCreate(System.currentTimeMillis());
-            quesstionMapper.update(quseetion);
+            Quseetion updateQuseetion = new Quseetion();
+            updateQuseetion.setGmtModified(System.currentTimeMillis());
+            updateQuseetion.setTitle(quseetion.getTitle());
+            updateQuseetion.setDescription(quseetion.getDescription());
+            updateQuseetion.setTag(quseetion.getTag());
+
+
+            QuseetionExample example = new QuseetionExample();
+            example.createCriteria().andIdEqualTo(quseetion.getId());
+
+            int update = quseetionMapper.updateByExampleSelective(updateQuseetion, example);
+            if (update !=1){
+                throw  new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FQUND);
+            }
+
         }
+    }
+
+    //增加阅读数
+    public void incViiew(Long id) {
+        Quseetion quseetion = new Quseetion();
+        quseetion.setId(id);
+        quseetion.setViewCount(1);
+        quseetionExtMapper.incViiew(quseetion);
     }
 }
