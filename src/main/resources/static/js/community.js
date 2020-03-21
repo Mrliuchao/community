@@ -2,6 +2,11 @@ function post() {
     var qusertionId = $("#question_id").val();
     var content = $("#comment_content").val();
 
+    if (!content){
+        alert("内容不能为空~~~~");
+        return;
+    }
+
     $.ajax({
         type: "POST",
         url: "/comment",
@@ -14,7 +19,8 @@ function post() {
         success: function (response) {
             console.log(response);
             if (response.code  ==200){
-                $("#comment_section").hide();
+                // $("#comment_section").hide();
+                window.location.reload();
             }else{
                 if (response.code == 2003){
                     //未登录
